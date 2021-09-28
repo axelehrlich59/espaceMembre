@@ -11,33 +11,41 @@ if (isset($_POST['email']) AND isset($_POST['password'])) {
 
     
 
-    $email = htmlspecialchars($_POST['email']);
-    $password = sha1($_POST['password']);
+        $email = htmlspecialchars($_POST['email']); 
+        $password = htmlspecialchars($_POST['password']);
+        
+        $email = strtolower($email); // email transformé en minuscule
+        
+        // On regarde si l'utilisateur est inscrit dans la table utilisateurs
+        $check = $db->prepare('SELECT pseudo, email, password FROM user WHERE email = ?');
+        $check->execute(array($email));
+        $data = $check->fetch();
+        $row = $check->rowCount();
+        
+        
 
-    if(!empty($email) && !empty($password)) {
- 
-    // cette requête permet de récupérer l'utilisateur depuis la BD
-    $requete = "SELECT * FROM user WHERE email = ? AND password = ?";
-    $resultat = $db->prepare($requete);
-   
-    $resultat->execute(array($email, $password));
-    
-    $userexist = $resultat->rowCount();
-	      if($userexist == 1) {
-	         $userinfo = $resultat->fetch();
-	         $_SESSION['id'] = $userinfo['id'];
-	         $_SESSION['pseudo'] = $userinfo['pseudo'];
-	         $_SESSION['email'] = $userinfo['email'];
-	         header("Location: ../views/user_espace.php?id=".$_SESSION['id']);
-	      } else {
-              $error = 'Erreur';
-              echo $error;
-          }
+        // Si > à 0 alors l'utilisateur existe
+        if($row > 0)
+        {
+            // Si le mail est bon niveau format
+            if(filter_var($email, FILTER_VALIDATE_EMAIL))
+            {
+                // Si le mot de passe est le bon
+                if(password_verify($password, $data['password']))
+                {
+                    // On créer la session et on redirige sur landing.php
+                    $_SESSION['user'] = $data['token'];
+                    header('Location: ../views/user_espace.php');
+                    die();
+                }else{ header('Location: ../views/login.php?login_err=password'); die(); }
+            }else{ header('Location: ../views/login.php?login_err=email'); die(); }
+        }else{ header('Location: ../views/login.php?login_err=already'); die(); }
+    }else{ header('Location: ../views/login.php'); die();} // si le formulaire est envoyé sans aucune données
 
-                                            }
+                                            
 
 
-                                                            }
+                                                            
 
 
 ?>
