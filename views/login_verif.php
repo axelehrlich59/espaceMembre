@@ -14,33 +14,34 @@ if (isset($_POST['email']) AND isset($_POST['password'])) {
         $email = htmlspecialchars($_POST['email']); 
         $password = htmlspecialchars($_POST['password']);
         
-        $email = strtolower($email); // email transformé en minuscule
+        $email = strtolower($email); // to lower case for security
         
-        // On regarde si l'utilisateur est inscrit dans la table utilisateurs
-        $check = $db->prepare('SELECT pseudo, email, password FROM user WHERE email = ?');
+        // If user is register into db
+        $check = $db->prepare('SELECT pseudo, email, password, token FROM user WHERE email = ?');
         $check->execute(array($email));
         $data = $check->fetch();
         $row = $check->rowCount();
         
         
 
-        // Si > à 0 alors l'utilisateur existe
+        // If we have a change into the db, the code is running
         if($row > 0)
         {
-            // Si le mail est bon niveau format
-            if(filter_var($email, FILTER_VALIDATE_EMAIL))
+            
+            if(filter_var($email, FILTER_VALIDATE_EMAIL)) // Filter mail
             {
-                // Si le mot de passe est le bon
-                if(password_verify($password, $data['password']))
+                
+                if(password_verify($password, $data['password'])) // If it's good password
                 {
-                    // On créer la session et on redirige sur landing.php
+                    // Create profile page session
+
                     $_SESSION['user'] = $data['token'];
                     header('Location: ../views/user_espace.php');
                     die();
                 }else{ header('Location: ../views/login.php?login_err=password'); die(); }
             }else{ header('Location: ../views/login.php?login_err=email'); die(); }
         }else{ header('Location: ../views/login.php?login_err=already'); die(); }
-    }else{ header('Location: ../views/login.php'); die();} // si le formulaire est envoyé sans aucune données
+    }else{ header('Location: ../views/login.php'); die();} // if send with no data
 
                                             
 
