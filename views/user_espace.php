@@ -46,7 +46,7 @@ $db = connection();
                     <li class="list-group-item">Pseudo : <?= $data['pseudo'];?></li>
                     <li class="list-group-item">Email : <?= $data['email'];?></li>
                     <li class="list-group-item">Mot de passe : <input class="form-control" type="password" placeholder="Readonly input here…" value="<?= $data['password'];?>" readonly></li>
-                    <li class="list-group-item"><a class="d-flex justify-content-center mt-1"><button class="btn btn-danger">Déconnexion</button></a></li>
+                    <li class="list-group-item"><a style="text-decoration: none" href="../views/logout.php" class="d-flex justify-content-center mt-1"><button class="btn btn-danger">Déconnexion</button></a></li>
                 </ul>
             </div>
         </div>
