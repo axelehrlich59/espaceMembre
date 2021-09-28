@@ -4,36 +4,47 @@ session_start();
 
 require '../src/config.php';
 
+
 $db = connection();
 
-//  Récupération de l'utilisateur et de son pass hashé
-$req = $db->prepare('SELECT id, password FROM user WHERE pseudo = :pseudo');
-$req->execute(array(
-    'pseudo' => $pseudo));
-$resultat = $req->fetch();
+if (isset($_POST['email']) AND isset($_POST['password'])) {
 
-// Comparaison du pass envoyé via le formulaire avec la base
-$isPasswordCorrect = password_verify($_POST['password'], $resultat['password']);
+    
 
-if (!$resultat)
-{
-    echo 'Mauvais identifiant ou mot de passe !';
-}
-else
-{
-    if ($isPasswordCorrect) {
-        session_start();
-        $_SESSION['id'] = $resultat['id'];
-        $_SESSION['pseudo'] = $pseudo;
-        echo 'Vous êtes connecté !';
-    }
-    else {
-        echo 'Mauvais identifiant ou mot de passe !';
-    }
-}
+    $email = htmlspecialchars($_POST['email']);
+    $password = sha1($_POST['password']);
+
+    if(!empty($email) && !empty($password)) {
+ 
+    // cette requête permet de récupérer l'utilisateur depuis la BD
+    $requete = "SELECT * FROM user WHERE email = ? AND password = ?";
+    $resultat = $db->prepare($requete);
+   
+    $resultat->execute(array($email, $password));
+    
+    $userexist = $resultat->rowCount();
+	      if($userexist == 1) {
+	         $userinfo = $resultat->fetch();
+	         $_SESSION['id'] = $userinfo['id'];
+	         $_SESSION['pseudo'] = $userinfo['pseudo'];
+	         $_SESSION['email'] = $userinfo['email'];
+	         header("Location: ../views/user_espace.php?id=".$_SESSION['id']);
+	      } else {
+              $error = 'Erreur';
+              echo $error;
+          }
+
+                                            }
 
 
+                                                            }
 
 
 ?>
+
+
+
+
+
+
 
